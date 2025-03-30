@@ -22,7 +22,7 @@ public class MonitorService
         Serilog.Log.Logger = new LoggerConfiguration()
             .MinimumLevel.Debug()
             .WriteTo.Console()
-            .WriteTo.Seq("http://localhost:5341")
+            .WriteTo.Seq("http://seq:5341")
             .Enrich.WithSpan()
             .CreateLogger();
         
