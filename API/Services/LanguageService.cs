@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Messages;
 
 namespace API.Services;
@@ -16,9 +17,19 @@ public class LanguageService
     
     public LanguageResponse GetLanguages()
     {
-        return new LanguageResponse
+        using var activity = MonitorService.ActivitySource.StartActivity("LanguageService");
+        MonitorService.Log.Information("In LanguageService, using GreetingService to retrieve languages.");
+
+        try
         {
-            Languages = GreetingService.Instance.GetLanguages()
-        };
+            var languages = GreetingService.Instance.GetLanguages();
+            MonitorService.Log.Debug("Retrieved {Amount} of languages from GreetingService");
+            return new LanguageResponse { Languages = languages };
+        }
+        catch (Exception ex)
+        {
+            MonitorService.Log.Error("Error while retrieving languages from GreetingService", ex);
+            throw;
+        }
     }
 }

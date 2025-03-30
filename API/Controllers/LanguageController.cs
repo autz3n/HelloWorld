@@ -11,7 +11,22 @@ public class LanguageController : ControllerBase
     [HttpGet]
     public IActionResult Get()
     {
-        var language = LanguageService.Instance.GetLanguages();
-        return Ok(new GetLanguageModel.Response { DefaultLanguage = language.DefaultLanguage, Languages = language.Languages });
+        using var activity = MonitorService.ActivitySource.StartActivity("LanguageControllerTrace");
+        MonitorService.Log.Information("Language API Controller, Getting Endpoint and Method");
+
+        try
+        {
+            var language = LanguageService.Instance.GetLanguages();
+            MonitorService.Log.Debug(
+                "Was Successfull in retrieving languages. Default {DefaultLanguage}, Amount: {LanguageAmount}",
+                language.DefaultLanguage, language.Languages?.Length ?? 0);
+            return Ok(new GetLanguageModel.Response
+                { DefaultLanguage = language.DefaultLanguage, Languages = language.Languages });
+        }
+        catch (Exception ex)
+        {
+            MonitorService.Log.Error("LanguageController: Failed to get languages");
+            return StatusCode(500, "Error fetching languages");
+        }
     }
 }

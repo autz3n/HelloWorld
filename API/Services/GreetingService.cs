@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.WebUtilities;
+
 namespace API.Services;
 
 public class GreetingService
@@ -14,6 +16,10 @@ public class GreetingService
     
     public GreetingResponse Greet(Messages.GreetingRequest request)
     {
+        
+        using var activity = MonitorService.ActivitySource.StartActivity("GreetingService");
+        MonitorService.Log.Debug("Calling GreetingService.Greet() for language: {Language}", request.LanguageCode);
+        
         var language = request.LanguageCode;
         var greeting = language switch
         {
@@ -30,11 +36,13 @@ public class GreetingService
             "hi" => "नमस्ते",
             "sw" => "Hujambo"
         };
+        MonitorService.Log.Debug("Created Greeting: {Greeting} in language: {Language}", greeting, language);
         return new GreetingResponse { Greeting = greeting };
     }
     
     public string[] GetLanguages()
     {
+        MonitorService.Log.Information("Using string array from GreetingService");
         return new [] { "en", "es", "fr", "de", "it", "pt", "ru", "zh", "ya", "ar", "hi", "sw" };
     }
 }

@@ -12,6 +12,8 @@ public class TextController : ControllerBase
     [HttpGet]
     public IActionResult Get(string languageCode)
     {
+        using var activity = MonitorService.ActivitySource.StartActivity("TextControllerTrace");
+        MonitorService.Log.Information("Text API Controller");
         try
         {
             var greeting = GreetingService.Instance.Greet(new GreetingRequest { LanguageCode = languageCode });
@@ -22,10 +24,12 @@ public class TextController : ControllerBase
                 Greeting = greeting.Greeting,
                 Planet = planet.Planet
             };
+            MonitorService.Log.Debug("Text API Controller response: " + response.Greeting);
             return Ok(response);
         }
         catch (Exception e)
         {
+            MonitorService.Log.Error(e, "Text API Controller hit catch block with error" + e.Message);
             return StatusCode(500, "An error occurred");
         }
     }
